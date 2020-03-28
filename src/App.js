@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import ImageSearch from './components/ImageSearch/ImageSearch';
+import ImageList from './components/ImageList/ImageList';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const API_KEY = "68176debe6d02d7fccf1f673a216fabd0f50b923fa7bae478f4073d7e6f58f27";
+const perPage = 12;
+class App extends React.Component {
+  state ={
+    images : [],
+    error: null
+  }
+  
+  fetchImages = async (event) => {
+    event.preventDefault();
+    const searchTerm= event.target.elements.searchValue.value;
+    const url = `https://api.unsplash.com/search/photos?query=${searchTerm}&client_id=${API_KEY}&per_page=${perPage}`
+    const request = await fetch(url);
+    const response = await request.json(); 
+    if(!searchTerm){
+      this.setState({error: "Please provide a value."});
+    } else {
+      this.setState({images: response.results, error:null});
+    }
+  }
 
-export default App;
+  render() {
+    return (
+      <div>
+        <ImageSearch fetchImages={this.fetchImages}/>
+
+        {
+          this.state.error !== null ? 
+          <div style={{color:"#fff", textAlign:"center"}}>{ this.state.error }</div> :
+          <ImageList images = {this.state.images}/>
+        }
+        
+      </div>
+    )
+  }
+} 
+
+export default App
